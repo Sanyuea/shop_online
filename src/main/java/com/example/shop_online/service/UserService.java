@@ -2,8 +2,6 @@ package com.example.shop_online.service;
 
 import com.example.shop_online.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.shop_online.query.UserLoginQuery;
-import com.example.shop_online.vo.LoginResultVO;
 
 /**
  * <p>
@@ -14,5 +12,5 @@ import com.example.shop_online.vo.LoginResultVO;
  * @since 2023-11-07
  */
 public interface UserService extends IService<User> {
-    LoginResultVO login(UserLoginQuery query);
+
 }
