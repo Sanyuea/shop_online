@@ -5,16 +5,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.shop_online.common.exception.ServerException;
 import com.example.shop_online.common.result.PageResult;
 import com.example.shop_online.convert.GoodsConvert;
-import com.example.shop_online.entity.Goods;
-import com.example.shop_online.entity.IndexRecommend;
-import com.example.shop_online.entity.IndexRecommendTab;
-import com.example.shop_online.mapper.GoodsMapper;
-import com.example.shop_online.mapper.IndexRecommendMapper;
-import com.example.shop_online.mapper.IndexRecommendTabMapper;
+import com.example.shop_online.entity.*;
+import com.example.shop_online.mapper.*;
 import com.example.shop_online.query.Query;
 import com.example.shop_online.query.RecommendByTabGoodsQuery;
 import com.example.shop_online.service.GoodsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.shop_online.vo.GoodsVO;
 import com.example.shop_online.vo.IndexTabGoodsVO;
 import com.example.shop_online.vo.IndexTabRecommendVO;
 import com.example.shop_online.vo.RecommendGoodsVO;
@@ -39,6 +36,9 @@ import java.util.List;
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
     private final IndexRecommendMapper indexRecommendMapper;
     private final IndexRecommendTabMapper indexRecommendTabMapper;
+    private final GoodsDetailMapper goodsDetailMapper;
+    private final GoodsSpecificationMapper goodsSpecificationMapper;
+    private final GoodsSpecificationDetailMapper goodsSpecificationDetailMapper;
     @Override
     public IndexTabRecommendVO getTabRecommendGoodsByTabId(RecommendByTabGoodsQuery query){
         //1.根据推荐的recommendid查询实体
@@ -83,5 +83,24 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         List<RecommendGoodsVO> result = GoodsConvert.INSTANCE.convertToRecommendGoodsVOList(goodsPage.getRecords());
         return new PageResult<>(page.getTotal(),query.getPageSize(), query.getPage(), page.getPages(),result);
 
+    }
+
+    @Override
+    public GoodsVO getGoodsDetail(Integer id){
+        Goods goods = baseMapper.selectById(id);
+        if (goods == null){
+            throw new ServerException("商品不存在");
+        }
+        GoodsVO goodsVO = GoodsConvert.INSTANCE.convertToGoodsVO(goods);
+        List<GoodsDetail> goodsDetails = goodsDetailMapper.selectList(new LambdaQueryWrapper<GoodsDetail>().eq(GoodsDetail::getGoodsId,goods.getId()));
+        goodsVO.setProperties(goodsDetails);
+        List<GoodsSpecification> specificationList = goodsSpecificationMapper.selectList(new LambdaQueryWrapper<GoodsSpecification>().eq(GoodsSpecification::getGoodsId,goods.getId()));
+        goodsVO.setSpecs(specificationList);
+        List<GoodsSpecificationDetail> goodsSpecificationDetails = goodsSpecificationDetailMapper.selectList(new LambdaQueryWrapper<GoodsSpecificationDetail>().eq(GoodsSpecificationDetail::getGoodsId,goods.getId()));
+        goodsVO.setSkus(goodsSpecificationDetails);
+        List<Goods> goodsList = baseMapper.selectList(new LambdaQueryWrapper<Goods>().eq(Goods::getCategoryId, goods.getCategoryId()).ne(Goods::getId, goods.getId()));
+        List<RecommendGoodsVO> goodsVOList = GoodsConvert.INSTANCE.convertToRecommendGoodsVOList(goodsList);
+        goodsVO.setSimilarProducts(goodsVOList);
+        return goodsVO;
     }
 }

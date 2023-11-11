@@ -5,16 +5,14 @@ import com.example.shop_online.common.result.Result;
 import com.example.shop_online.query.Query;
 import com.example.shop_online.query.RecommendByTabGoodsQuery;
 import com.example.shop_online.service.GoodsService;
+import com.example.shop_online.vo.GoodsVO;
 import com.example.shop_online.vo.IndexTabRecommendVO;
 import com.example.shop_online.vo.RecommendGoodsVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -44,5 +42,12 @@ public class GoodsController {
     public Result<PageResult<RecommendGoodsVO>> getRecommendGoodsByPage(@RequestBody @Validated Query query){
         PageResult<RecommendGoodsVO> result = goodsService.getRecommendGoodsByPage(query);
         return Result.ok(result);
+    }
+
+    @Operation(summary = "首页-商品详情")
+    @GetMapping("detail")
+    public Result<GoodsVO> getGoodsDetail(@RequestParam Integer id) {
+        GoodsVO goodsDetail = goodsService.getGoodsDetail(id);
+        return Result.ok(goodsDetail);
     }
  }
