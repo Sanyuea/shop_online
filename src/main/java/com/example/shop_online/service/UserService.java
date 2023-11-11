@@ -4,6 +4,7 @@ import com.example.shop_online.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.shop_online.query.UserLoginQuery;
 import com.example.shop_online.vo.LoginResultVO;
+import com.example.shop_online.vo.UserVO;
 
 /**
  * <p>
@@ -15,4 +16,6 @@ import com.example.shop_online.vo.LoginResultVO;
  */
 public interface UserService extends IService<User> {
     LoginResultVO login(UserLoginQuery query);
+    User getUserInfo(Integer userId);
+    UserVO editUserInfo(UserVO userVO);
 }

@@ -16,7 +16,9 @@ import com.example.shop_online.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.shop_online.vo.LoginResultVO;
 import com.example.shop_online.vo.UserTokenVO;
+import com.example.shop_online.vo.UserVO;
 import io.netty.util.internal.StringUtil;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -32,8 +34,10 @@ import static com.example.shop_online.constant.APIConstant.*;
  * @since 2023-11-07
  */
 @Service
+@AllArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
+    private final  RedisService redisService;
     @Override
     public LoginResultVO login(UserLoginQuery query) {
         //  1、获取openId
@@ -67,6 +71,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //4.生成token，存入redis并设置过期时间
         UserTokenVO tokenVO = new UserTokenVO(userV0.getId());
         String token = JWTUtils.generateToken(JWT_SECRET,tokenVO.toMap());
+        redisService.set(APP_NAME+userV0.getId(),token,APP_TOKEN_EXPIRE_TIME);
+        userV0.setToken(token);
         return userV0;
+    }
+
+    @Override
+    public User getUserInfo(Integer userId){
+        User user = baseMapper.selectById(userId);
+        if(user == null){
+            throw new ServerException("用户不存在");
+        }
+        return user;
+    }
+
+    @Override
+    public UserVO editUserInfo(UserVO userVO){
+        User user = baseMapper.selectById(userVO.getId());
+        if(user == null){
+            throw new ServerException("用户不存在");
+        }
+        User userConvert = UserConvert.INSTANCE.convert(userVO);
+        updateById(userConvert);
+        return userVO;
     }
 }

@@ -19,7 +19,7 @@ public class APIConstant {
     /**
      * 默认头像
      */
-    public static String DEFAULT_AVATAR = "默认头像链接";
+    public static String DEFAULT_AVATAR = "https://ycshang123.oss-cn-hangzhou.aliyuncs.com/cover%20%282%29.png";
     /**
      * APP_ID
      */
