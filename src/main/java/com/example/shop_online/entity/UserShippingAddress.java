@@ -60,12 +60,12 @@ public class UserShippingAddress {
 
     @ApiModelProperty("是否为默认地址(0-否，1-是)")
     @TableField("is_default")
-    private Byte isDefault;
+    private Integer isDefault;
 
     @ApiModelProperty("逻辑删除(0-未删除，1-已删除)")
     @TableField("delete_flag")
     @TableLogic
-    private Byte deleteFlag;
+    private Integer deleteFlag;
 
     @ApiModelProperty("创建时间")
     @TableField(value = "create_time", fill = FieldFill.INSERT)

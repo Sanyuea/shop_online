@@ -44,12 +44,12 @@ public class Category {
 
     @ApiModelProperty("是否推荐(0-全推荐，1-推荐首页，2-推荐商品分类页)")
     @TableField("is_recommend")
-    private Byte isRecommend;
+    private Integer isRecommend;
 
     @ApiModelProperty("逻辑删除(0-未删除，1-已删除)")
     @TableField("delete_flag")
     @TableLogic
-    private Byte deleteFlag;
+    private Integer deleteFlag;
 
     @ApiModelProperty("创建时间")
     @TableField(value = "create_time", fill = FieldFill.INSERT)

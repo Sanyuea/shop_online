@@ -56,11 +56,11 @@ public class UserOrder {
 
     @ApiModelProperty("订单状态，1为待付款、2为待发货、3为待收货、4为待评价、5为已完成、6为已取消，未传该参数或0为全部")
     @TableField("status")
-    private Byte status;
+    private Integer status;
 
     @ApiModelProperty("1-不限，2-工作日，3-双休或假日")
     @TableField("delivery_time_type")
-    private Byte deliveryTimeType;
+    private Integer deliveryTimeType;
 
     @ApiModelProperty("订单备注")
     @TableField("buyer_message")
@@ -68,11 +68,11 @@ public class UserOrder {
 
     @ApiModelProperty("1-在线支付，2-货到付款")
     @TableField("pay_type")
-    private Byte payType;
+    private Integer payType;
 
     @ApiModelProperty("线上支付渠道，1-支付宝，2-微信")
     @TableField("pay_channel")
-    private Byte payChannel;
+    private Integer payChannel;
 
     @ApiModelProperty("订单取消理由")
     @TableField("cancel_reason")
@@ -81,7 +81,7 @@ public class UserOrder {
     @ApiModelProperty("删除标识（0-未删除，1-已删除）")
     @TableField("delete_flag")
     @TableLogic
-    private Byte deleteFlag;
+    private Integer deleteFlag;
 
     @ApiModelProperty("创建时间")
     @TableField(value = "create_time", fill = FieldFill.INSERT)
