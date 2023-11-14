@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.shop_online.query.CartQuery;
 import com.example.shop_online.query.EditCartQuery;
 import com.example.shop_online.vo.CartGoodsVO;
+import io.swagger.models.auth.In;
 
 import java.util.List;
 
@@ -24,4 +25,6 @@ public interface UserShoppingCartService extends IService<UserShoppingCart> {
     List<CartGoodsVO> shopCartList(Integer userId);
     //修改购物车
     CartGoodsVO editCart(EditCartQuery query);
+    //删除清空购物车
+    void removeCartGoods(Integer userId,List<Integer> ids);
 }

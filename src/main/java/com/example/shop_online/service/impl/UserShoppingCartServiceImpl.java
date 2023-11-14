@@ -1,5 +1,6 @@
 package com.example.shop_online.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.shop_online.common.exception.ServerException;
 import com.example.shop_online.entity.Goods;
 import com.example.shop_online.entity.UserShoppingCart;
@@ -14,6 +15,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -94,6 +96,19 @@ public class UserShoppingCartServiceImpl extends ServiceImpl<UserShoppingCartMap
         goodsVO.setPicture(goods.getCover());
         goodsVO.setDiscount(goods.getDiscount());
         return goodsVO;
+    }
+
+    @Override
+    public void removeCartGoods(Integer userId,List<Integer> ids){
+        //1.查询用户购物车列表
+        List<UserShoppingCart> cartList = baseMapper.selectList(new LambdaQueryWrapper<UserShoppingCart>().eq(UserShoppingCart::getUserId,userId));
+        if (cartList.size()==0){
+            return;
+        }
+        //2.与需要删除的购物车取交集
+        List<UserShoppingCart> deleteCartList = cartList.stream().filter(item -> ids.contains(item.getId())).collect(Collectors.toList());
+        //3.删除购物车信息
+        removeBatchByIds(deleteCartList);
     }
 
 }
