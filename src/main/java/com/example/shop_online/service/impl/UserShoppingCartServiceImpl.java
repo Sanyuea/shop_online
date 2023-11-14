@@ -111,4 +111,14 @@ public class UserShoppingCartServiceImpl extends ServiceImpl<UserShoppingCartMap
         removeBatchByIds(deleteCartList);
     }
 
+    @Override
+    public void editCartSelected(Boolean selected,Integer userId){
+        List<UserShoppingCart> cartList = baseMapper.selectList(new LambdaQueryWrapper<UserShoppingCart>().eq(UserShoppingCart::getUserId,userId));
+        if (cartList.size()==0){
+            return;
+        }
+        cartList.stream().forEach(item -> item.setSelected(selected));
+        saveOrUpdateBatch(cartList);
+    }
+
 }

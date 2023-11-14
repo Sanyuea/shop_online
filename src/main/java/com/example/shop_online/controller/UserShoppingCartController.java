@@ -66,4 +66,12 @@ import static com.example.shop_online.common.utils.ObtainUserIdUtils.getUserId;
         userShoppingCartService.removeCartGoods(userId, ids);
         return Result.ok();
     }
+
+    @Operation(summary = "购物车全选/取消全选")
+    @PutMapping("selected")
+    public Result editCartSelected(@RequestParam Boolean selected, HttpServletRequest request) {
+        Integer userId = getUserId(request);
+        userShoppingCartService.editCartSelected(selected, userId);
+        return Result.ok();
+    }
     }
