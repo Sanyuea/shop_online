@@ -2,6 +2,7 @@ package com.example.shop_online.controller;
 
 import com.example.shop_online.common.result.Result;
 import com.example.shop_online.query.CartQuery;
+import com.example.shop_online.query.EditCartQuery;
 import com.example.shop_online.service.UserShoppingCartService;
 import com.example.shop_online.vo.AddressVO;
 import com.example.shop_online.vo.CartGoodsVO;
@@ -45,5 +46,13 @@ import static com.example.shop_online.common.utils.ObtainUserIdUtils.getUserId;
         Integer userId = getUserId(request);
         List<CartGoodsVO> list = userShoppingCartService.shopCartList(userId);
         return Result.ok(list);
+    }
+
+    @Operation(summary = "修改购物车单品")
+    @PutMapping("edit")
+    public Result<CartGoodsVO> editShopCart(@RequestBody @Validated EditCartQuery query) {
+        CartGoodsVO goodsVO = userShoppingCartService.editCart(query);
+        return Result.ok(goodsVO);
+
     }
     }
