@@ -6,25 +6,27 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.time.LocalDateTime;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author yule
  * @since 2023-11-07
  */
-@Getter
-@Setter
-@TableName("t_user_shipping_address")
-@ApiModel(value = "UserShippingAddress对象", description = "")
-public class UserShippingAddress {
+@Data
+@TableName("t_user_shopping_address")
+@ApiModel(value = "UserShoppingAddress对象", description = "")
+public class UserShoppingAddress {
 
     @ApiModelProperty("主键id")
     @TableId(value = "id", type = IdType.AUTO)
