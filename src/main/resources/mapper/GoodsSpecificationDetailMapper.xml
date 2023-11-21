@@ -10,7 +10,7 @@
         <result column="inventory" property="inventory" />
         <result column="price" property="price" />
         <result column="old_price" property="oldPrice" />
-        <result column="specs" property="specs" />
+<!--        <result column="specs" property="specs" />-->
         <result column="delete_flag" property="deleteFlag" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
