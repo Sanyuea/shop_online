@@ -9,6 +9,7 @@ import com.example.shop_online.query.OrderPreQuery;
 import com.example.shop_online.query.OrderQuery;
 import com.example.shop_online.service.UserOrderService;
 import com.example.shop_online.vo.OrderDetailVO;
+import com.example.shop_online.vo.OrderLogisticVO;
 import com.example.shop_online.vo.SubmitOrderVO;
 import com.example.shop_online.vo.UserOrderVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -125,6 +126,26 @@ import static com.example.shop_online.common.utils.ObtainUserIdUtils.getUserId;
         }
         userOrderService.payOrder(id);
         return Result.ok();
+    }
+
+    @Operation(summary = "确认收货")
+    @PutMapping("receipt")
+    public Result<OrderDetailVO> receiptOrder(@RequestParam Integer id) {
+        if (id == null) {
+            throw new ServerException("订单不存在");
+        }
+        OrderDetailVO orderDetailVO = userOrderService.receiptOrder(id);
+        return Result.ok(orderDetailVO);
+    }
+
+    @Operation(summary = "获取物流信息")
+    @GetMapping("logistics")
+    public Result<OrderLogisticVO> getOrderLogistics(@RequestParam Integer id) {
+        if (id == null) {
+            throw new ServerException("订单不存在");
+        }
+        OrderLogisticVO orderLogistics = userOrderService.getOrderLogistics(id);
+        return Result.ok(orderLogistics);
     }
 
 
