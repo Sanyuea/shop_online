@@ -3,16 +3,14 @@ package com.example.shop_online.controller;
 import com.alibaba.fastjson2.JSONObject;
 import com.example.shop_online.common.result.Result;
 import com.example.shop_online.service.UserOrderService;
+import com.example.shop_online.vo.SubmitOrderVO;
 import com.example.shop_online.vo.UserOrderVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.example.shop_online.common.utils.ObtainUserIdUtils.getUserId;
 
@@ -40,5 +38,12 @@ import static com.example.shop_online.common.utils.ObtainUserIdUtils.getUserId;
             return Result.ok(json);
         }
 
+    @Operation(summary = "填写订单 - 获取预付订单")
+    @GetMapping("pre")
+    public Result<SubmitOrderVO> getPreOrderDetail(HttpServletRequest request) {
+        Integer userId = getUserId(request);
+        SubmitOrderVO preOrderDetail = userOrderService.getPreOrderDetail(userId);
+        return Result.ok(preOrderDetail);
+    }
 
     }
