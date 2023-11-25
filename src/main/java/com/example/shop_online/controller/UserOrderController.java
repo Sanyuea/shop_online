@@ -2,8 +2,11 @@ package com.example.shop_online.controller;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.example.shop_online.common.exception.ServerException;
+import com.example.shop_online.common.result.PageResult;
 import com.example.shop_online.common.result.Result;
+import com.example.shop_online.query.CancelGoodsQuery;
 import com.example.shop_online.query.OrderPreQuery;
+import com.example.shop_online.query.OrderQuery;
 import com.example.shop_online.service.UserOrderService;
 import com.example.shop_online.vo.OrderDetailVO;
 import com.example.shop_online.vo.SubmitOrderVO;
@@ -14,6 +17,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.example.shop_online.common.utils.ObtainUserIdUtils.getUserId;
 
@@ -76,6 +81,30 @@ import static com.example.shop_online.common.utils.ObtainUserIdUtils.getUserId;
         }
         SubmitOrderVO repurchaseOrderDetail = userOrderService.getRepurchaseOrderDetail(id);
         return Result.ok(repurchaseOrderDetail);
+    }
+
+    @Operation(summary = "订单列表")
+    @PostMapping("page")
+    public Result<PageResult<OrderDetailVO>> getOrderList(@RequestBody @Validated OrderQuery query, HttpServletRequest request) {
+        Integer userId = getUserId(request);
+        query.setUserId(userId);
+        PageResult<OrderDetailVO> orderList = userOrderService.getOrderList(query);
+        return Result.ok(orderList);
+    }
+
+    @Operation(summary = "取消订单")
+    @PutMapping("cancel")
+    public Result<OrderDetailVO> cancelOrder(@RequestBody @Validated CancelGoodsQuery query) {
+        OrderDetailVO orderDetailVO = userOrderService.cancelOrder(query);
+        return Result.ok(orderDetailVO);
+    }
+
+    @Operation(summary = "删除订单")
+    @DeleteMapping("delete")
+    public Result deleteOrder(@RequestBody List<Integer> ids, HttpServletRequest request) {
+        Integer userId = getUserId(request);
+        userOrderService.deleteOrder(ids, userId);
+        return Result.ok();
     }
 
 

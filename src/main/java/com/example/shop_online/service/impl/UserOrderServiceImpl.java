@@ -1,14 +1,18 @@
 package com.example.shop_online.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.shop_online.common.exception.ServerException;
+import com.example.shop_online.common.result.PageResult;
 import com.example.shop_online.convert.UserAddressConvert;
 import com.example.shop_online.convert.UserOrderDetailConvert;
 import com.example.shop_online.entity.*;
 import com.example.shop_online.enums.OrderStatusEnum;
 import com.example.shop_online.mapper.*;
+import com.example.shop_online.query.CancelGoodsQuery;
 import com.example.shop_online.query.OrderGoodsQuery;
 import com.example.shop_online.query.OrderPreQuery;
+import com.example.shop_online.query.OrderQuery;
 import com.example.shop_online.service.UserOrderGoodsService;
 import com.example.shop_online.service.UserOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -307,5 +311,82 @@ public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrder
             addressList.add(userAddressVO);
         }
         return addressList;
+    }
+
+    @Override
+    public PageResult<OrderDetailVO> getOrderList(OrderQuery query){
+        List<OrderDetailVO> list = new ArrayList<>();
+        Page<UserOrder> page = new Page<>(query.getPage(),query.getPageSize());
+        LambdaQueryWrapper<UserOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserOrder::getUserId,query.getUserId());
+        if (query.getOrderType() != null && query.getOrderType() != 0){
+            wrapper.eq(UserOrder::getStatus,query.getOrderType());
+        }
+        wrapper.orderByDesc(UserOrder::getCreateTime);
+        List<UserOrder> orderRecords = baseMapper.selectPage(page,wrapper).getRecords();
+        if (orderRecords.size() == 0){
+            return new PageResult<>(page.getTotal(),query.getPageSize(),query.getPage(),page.getPages(),list);
+        }
+        for (UserOrder userOrder:orderRecords){
+            OrderDetailVO orderDetailVO = UserOrderDetailConvert.INSTANCE.convertToOrderDetailVO(userOrder);
+            UserShoppingAddress userShoppingAddress = userShoppingAddressMapper.selectById(userOrder.getAddressId());
+            if (userShoppingAddress != null){
+                orderDetailVO.setReceiverContact(userShoppingAddress.getReceiver());
+                orderDetailVO.setReceiverAddress(userShoppingAddress.getAddress());
+                orderDetailVO.setReceiverMobile(userShoppingAddress.getContact());
+            }
+            List<UserOrderGoods> userOrderGoods = userOrderGoodsMapper.selectList(new LambdaQueryWrapper<UserOrderGoods>().eq(UserOrderGoods::getOrderId,userOrder.getId()));
+            orderDetailVO.setSkus(userOrderGoods);
+            list.add(orderDetailVO);
+        }
+        return new PageResult<>(page.getTotal(),query.getPageSize(),query.getPage(),page.getPages(),list);
+    }
+
+    @Override
+    public OrderDetailVO cancelOrder(CancelGoodsQuery query){
+        UserOrder userOrder = baseMapper.selectById(query.getId());
+        if (userOrder == null){
+            throw new ServerException("订单信息不存在");
+        }
+        if (userOrder.getStatus() != OrderStatusEnum.WAITING_FOR_PAYMENT.getValue()){
+            throw new ServerException("订单已付款，取消失败");
+        }
+        userOrder.setStatus(OrderStatusEnum.CANCELLED.getValue());
+        userOrder.setCancelReason(query.getCancelReason());
+        userOrder.setCloseTime(LocalDateTime.now());
+        baseMapper.updateById(userOrder);
+        OrderDetailVO orderDetailVO = UserOrderDetailConvert.INSTANCE.convertToOrderDetailVO(userOrder);
+        UserShoppingAddress userShoppingAddress = userShoppingAddressMapper.selectById(userOrder.getAddressId());
+        if (userShoppingAddress != null){
+            orderDetailVO.setReceiverContact(userShoppingAddress.getReceiver());
+            orderDetailVO.setReceiverAddress(userShoppingAddress.getAddress());
+            orderDetailVO.setReceiverMobile(userShoppingAddress.getContact());
+        }
+        List<UserOrderGoods> goodsList = userOrderGoodsMapper.selectList(new LambdaQueryWrapper<UserOrderGoods>().eq(UserOrderGoods::getOrderId,userOrder.getId()));
+        orderDetailVO.setSkus(goodsList);
+        return orderDetailVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteOrder(List<Integer> ids, Integer userId) {
+        // 仅在订单状态为 待评价、已完成、已取消时，可删除订单
+        LambdaQueryWrapper<UserOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserOrder::getUserId, userId);
+        wrapper.eq(UserOrder::getStatus, OrderStatusEnum.WAITING_FOR_REVIEW.getValue()).or().eq(UserOrder::getStatus, OrderStatusEnum.COMPLETED.getValue()).or().eq(UserOrder::getStatus, OrderStatusEnum.CANCELLED.getValue());
+        List<UserOrder> userOrders = baseMapper.selectList(wrapper);
+        // 将查询到的订单和要删除的订单列表取交集，避免误删订单
+        List<UserOrder> list = userOrders.stream().filter(item -> ids.contains(item.getId())).collect(Collectors.toList());
+        // 当可删除的订单集合长度为0时，抛出暂无可删除订单的异常
+        if (list.size() == 0) {
+            throw new ServerException("暂无可以删除的订单");
+        }
+        // 删除订单信息
+        removeByIds(list);
+        // 删除购买的商品信息
+        for (UserOrder userOrder : list) {
+            userOrderGoodsMapper.delete(new LambdaQueryWrapper<UserOrderGoods>().eq(UserOrderGoods::getOrderId, userOrder.getId()));
+        }
+
     }
 }
