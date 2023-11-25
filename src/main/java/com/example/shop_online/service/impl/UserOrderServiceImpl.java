@@ -389,4 +389,34 @@ public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrder
         }
 
     }
+
+    @Override
+    public void consignOrder(Integer id) {
+        UserOrder userOrder = baseMapper.selectById(id);
+        if (userOrder == null) {
+            throw new ServerException("订单不存在");
+        }
+        if (!userOrder.getStatus().equals(OrderStatusEnum.WAITING_FOR_SHIPMENT.getValue())) {
+            throw new ServerException("订单已发货");
+        }
+        userOrder.setStatus(OrderStatusEnum.WAITING_FOR_DELIVERY.getValue());
+        userOrder.setConsignTime(LocalDateTime.now());
+        baseMapper.updateById(userOrder);
+    }
+
+    @Override
+    public void payOrder(Integer id) {
+        UserOrder userOrder = baseMapper.selectById(id);
+        if (userOrder == null) {
+            throw new ServerException("订单不存在");
+        }
+        if (!userOrder.getStatus().equals(OrderStatusEnum.WAITING_FOR_PAYMENT.getValue())) {
+            throw new ServerException("该订单暂时无法支付");
+        }
+        userOrder.setStatus(OrderStatusEnum.WAITING_FOR_SHIPMENT.getValue());
+        userOrder.setPayTime(LocalDateTime.now());
+        baseMapper.updateById(userOrder);
+//        订单支付成功，异步任务取消
+        cancelScheduledTask();
+    }
 }

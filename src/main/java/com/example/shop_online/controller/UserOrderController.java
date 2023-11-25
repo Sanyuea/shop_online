@@ -107,5 +107,25 @@ import static com.example.shop_online.common.utils.ObtainUserIdUtils.getUserId;
         return Result.ok();
     }
 
+    @Operation(summary = "模拟发货")
+    @GetMapping("consignment")
+    public Result consignOrder(@RequestParam Integer id) {
+        if (id == null) {
+            throw new ServerException("订单不存在");
+        }
+        userOrderService.consignOrder(id);
+        return Result.ok();
+    }
+
+    @Operation(summary = "支付订单")
+    @GetMapping("pay")
+    public Result payOrder(@RequestParam Integer id) {
+        if (id == null) {
+            throw new ServerException("订单不存在");
+        }
+        userOrderService.payOrder(id);
+        return Result.ok();
+    }
+
 
 }
